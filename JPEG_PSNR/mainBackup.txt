@@ -1,0 +1,669 @@
+//
+//  main.cpp
+//  JPEG_PSNR
+//
+//  Created by Ahmed Hussein Salamah on 2019-09-20.
+//  Copyright © 2019 Ahmed Hussein Salamah. All rights reserved.
+//
+
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+
+#include <math.h>
+//#include <ctime>
+//#include <cv.h>
+//#include <cxcore.h>
+//#include <highgui.h>
+
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+#include <cstdio>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <array>
+
+#include <fstream>
+#include <regex>
+
+#include "jpegdecoder.h"
+#include "TypeDef.h"
+#include "jpegencoderMultipleQF.h"
+
+#define S7S_debug 2
+
+using namespace std;
+using namespace cv;
+
+template <class Container>
+static void split1(const std::string& str, Container& cont, char delim = ' ')
+{
+std::stringstream ss(str);
+std::string token;
+while (std::getline(ss, token, delim)) {
+
+cont.push_back(token);
+}
+}
+
+// std::string exec(const char* cmd) {
+vector<string> exec(const char* cmd) {
+std::array<char, 128> buffer;
+// std::string result;
+
+vector <string> result;
+std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+if (!pipe) {
+throw std::runtime_error("popen() failed!");
+}
+int i = 0;
+while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+// contains
+std::string zero = "0x0";
+std::string data = buffer.data();
+i = i  + int( data.find(zero) != std::string::npos);
+if (i == 2) break;
+
+result.push_back(data);
+
+}
+return result;
+}
+
+static double getBpp(const vector<string>& result, string bitstream_file, int width, int height, string go_file)
+{
+ifstream file( bitstream_file, ios::binary | ios::ate);
+long long total_size = file.tellg();
+
+
+std:string prev = "";
+int len = 0;
+for (int i = 0; i < result.size(); ++i)
+{
+string current = result[i];
+string frame_marker = "NAL_IDR_W_RADL";
+
+// found the frame marker
+if(current.find(frame_marker) != std::string::npos)
+{
+// get hexadecimal2
+vector<string> hexList2;
+split1(current, hexList2, ':');
+string hexstring2 = hexList2[0];
+// convert number to hexadecimal
+int frame_address = std::stoi(hexstring2, 0, 16);
+
+// cout << "frame_address " << frame_address << endl;
+
+// get hexadecimal1
+int after_frame_address = 0;
+// if IDR is not the last one
+if( (1 + i) != result.size())
+{
+vector<string> hexList1;
+split1(result[1 + i], hexList1, ':');
+string hexstring1 = hexList1[0];
+// convert number to hexadecimal
+after_frame_address = std::stoi(hexstring1, 0, 16);
+}
+else
+{
+after_frame_address = total_size;
+}
+
+len = after_frame_address - frame_address; // in bytes
+break;
+}
+prev = current;
+
+}
+
+double bpp = 8.0 * len / (width * height); // in bits
+// remove the file
+// remove( "go.txt" );
+remove( go_file.c_str() );
+return bpp;
+}
+
+static int convertStringToNumber(const string& str)
+{
+int number;
+std::istringstream iss (str);
+iss >> number;
+
+return number;
+}
+
+//static double getPSNR(const cv::Mat& i1, const cv::Mat& i2, int comp_width, int comp_height)
+//{
+//
+//    int d     = CV_8U;
+//    Mat I1, I2;
+//    i1.convertTo(I1, d);           // cannot calculate on one byte large values
+//    i2.convertTo(I2, d);
+//
+//
+//    Mat s1;
+//    absdiff(I1, I2, s1);       // |I1 - I2|
+//#if S7S_debug
+//    cout<<"here **"<<endl;
+//    for(int i = 0; i < 8; ++i){
+//        for(int j = 0; j < 8; ++j){
+//            cout << int(s1.at<unsigned char>(i,j))<<","<<int(I1.at<unsigned char>(i,j))<<","<< int(I2.at<unsigned char>(i,j))<< " ";
+//        }
+//        cout << "\n";
+//    }
+//#endif
+//    s1.convertTo(s1, CV_32F);  // cannot make a square on 8 bits
+//    s1 = s1.mul(s1);           // |I1 - I2|^2
+//
+//    Scalar s = sum(s1);         // sum elements per channel
+//
+//    double mse = (s[0]); // sum channels
+//#if S7S_debug
+//     cout << "MSE: " << mse << endl;
+//#endif
+//    if( mse <= 1e-10) // for small values return zero
+//    {
+//        return 999.99;
+//    }
+//    else
+//    {
+//        double psnr = 10.0*log10(double(255*255*double(comp_width*comp_height))/mse);
+//        return psnr;
+//    }
+//}
+
+
+
+double getPSNR3(const Mat& I1, const Mat& I2)
+{
+Mat s1;
+absdiff(I1, I2, s1);       // |I1 - I2|
+s1.convertTo(s1, CV_32F);  // cannot make a square on 8 bits
+s1 = s1.mul(s1);           // |I1 - I2|^2
+
+Scalar s = sum(s1);        // sum elements per channel
+
+double sse = s.val[0] + s.val[1] + s.val[2]; // sum channels
+
+if( sse <= 1e-10) // for small values return zero
+return 0;
+else
+{
+double mse  = sse / (double)(I1.channels() * I1.total());
+double psnr = 10.0 * log10((255 * 255) / mse);
+return psnr;
+}
+}
+
+
+
+//Scalar getMSSIM( const Mat& i1, const Mat& i2)
+//{
+//    const double C1 = 6.5025, C2 = 58.5225;
+//    /***************************** INITS **********************************/
+//    int d     = CV_32F;
+//
+//    Mat I1, I2;
+//    i1.convertTo(I1, d);           // cannot calculate on one byte large values
+//    i2.convertTo(I2, d);
+//
+//    Mat I2_2   = I2.mul(I2);        // I2^2
+//    Mat I1_2   = I1.mul(I1);        // I1^2
+//    Mat I1_I2  = I1.mul(I2);        // I1 * I2
+//
+//    /*************************** END INITS **********************************/
+//
+//    Mat mu1, mu2;   // PRELIMINARY COMPUTING
+//    GaussianBlur(I1, mu1, Size(11, 11), 1.5);
+//    GaussianBlur(I2, mu2, Size(11, 11), 1.5);
+//
+//    Mat mu1_2   =   mu1.mul(mu1);
+//    Mat mu2_2   =   mu2.mul(mu2);
+//    Mat mu1_mu2 =   mu1.mul(mu2);
+//
+//    Mat sigma1_2, sigma2_2, sigma12;
+//
+//    GaussianBlur(I1_2, sigma1_2, Size(11, 11), 1.5);
+//    sigma1_2 -= mu1_2;
+//
+//    GaussianBlur(I2_2, sigma2_2, Size(11, 11), 1.5);
+//    sigma2_2 -= mu2_2;
+//
+//    GaussianBlur(I1_I2, sigma12, Size(11, 11), 1.5);
+//    sigma12 -= mu1_mu2;
+//
+//    ///////////////////////////////// FORMULA ////////////////////////////////
+//    Mat t1, t2, t3;
+//
+//    t1 = 2 * mu1_mu2 + C1;
+//    t2 = 2 * sigma12 + C2;
+//    t3 = t1.mul(t2);              // t3 = ((2*mu1_mu2 + C1).*(2*sigma12 + C2))
+//
+//    t1 = mu1_2 + mu2_2 + C1;
+//    t2 = sigma1_2 + sigma2_2 + C2;
+//    t1 = t1.mul(t2);               // t1 =((mu1_2 + mu2_2 + C1).*(sigma1_2 + sigma2_2 + C2))
+//
+//    Mat ssim_map;
+//    divide(t3, t1, ssim_map);      // ssim_map =  t3./t1;
+//
+//    Scalar mssim = mean( ssim_map ); // mssim = average of ssim map
+//    return mssim;
+//}
+
+void reportMetrics(double x, double y, double z)
+{
+cout << "X: " << x << "\nY: " << y << "\nZ: " << z << endl;
+}
+
+char* read_yuv(string filename, int width, int height)
+{
+std::ifstream myfile (filename, std::ifstream::binary);
+
+if(myfile)
+{
+// get length of file:
+myfile.seekg (0, myfile.end);
+long long length = myfile.tellg();
+// cout << "Len in read yuv: " << length << endl;
+
+myfile.seekg (0, myfile.beg);
+
+char * buffer = new char [length];
+
+// std::cout << "Reading " << length << " characters... " << endl;
+// read data as a block:
+myfile.read (buffer, length);
+
+if (myfile)
+{
+// std::cout << "all characters read successfully." << endl;
+}
+else
+std::cout << "error: only " << myfile.gcount() << " could be read" << endl;
+myfile.close();
+
+return buffer;
+}
+
+return NULL;
+
+}
+#ifdef FIRST_MAIN
+// video-input-ssim.htm
+int main(int argc, char** argv) {
+
+
+//    if(argc < 4)
+//    {
+//        // Tell the user how to run the program
+//        std::cerr << "Number of arguments should be 4: <jpegfile1> <jpegfile2> <out_file>" << std::endl;
+//        /* "Usage messages" are a conventional way of telling the user
+//         * how to run a program if they enter the command incorrectly.
+//         */
+//        return 1;
+//    }
+
+// Input file:
+//    std::string f1_yuv = argv[1];
+std::string f1_yuv = "/Users/ahamsala/Documents/validation_original/shard-0/1/ILSVRC2012_val_00000001.JPEG";
+
+// Input file:
+//    std::string f2_yuv = argv[2];
+std::string f2_yuv = "/Volumes/MultiCom_104/validation_generated_QF/shard-0/1/ILSVRC2012_val_00000001-QF-0.JPEG";
+
+// Out text file
+//    std::string out_file = argv[3];
+
+Mat image1;
+image1 = imread(f1_yuv);
+
+Mat image2;
+image2 = imread(f2_yuv);
+
+// From RGB2YUV:
+cv::Mat yuv1;
+yuv1 = image1.clone();
+cv::cvtColor(image1, yuv1, cv::COLOR_BGR2YCrCb);
+cout << yuv1.rows << ", " << yuv1.cols << endl;
+//    imshow("grayPart_BGR2YUV_I420", image1);
+//    cv::waitKey(0);
+
+int width = image1.cols;
+int height = image1.rows;
+Scalar final_psnr = getPSNR(image1, image2 , width, height);
+cout << "Hello " << final_psnr << endl;
+
+Scalar final_psnr3 = getPSNR3(image1, image2);
+cout << "Hello " << final_psnr3 << endl;
+
+
+Scalar final_mssim = getMSSIM(image1, image2);
+cout << "Hello " << final_mssim << endl;
+
+
+//    int nComponents = 1;
+//    double u_ssim = 0;
+//    double v_ssim = 0;
+//
+//
+//    double u_psnr = 0;
+//    double v_psnr = 0;
+
+//    double ssim = (6.0*y_ssim + u_ssim + v_ssim)/8.0;
+//    cout << "ssim=" << ssim << endl;
+//
+//    double psnr = (6.0*y_psnr + u_psnr + v_psnr)/8.0;
+//    cout << "psnr=" << psnr << endl;
+
+// Write the file path
+//    string fileNameTime = "";
+//    std::ostringstream ossTime;
+//    fileNameTime = out_file;
+//    char* pYUVFileNameTime = fileNameTime.empty()? NULL: strdup(fileNameTime.c_str());
+//    FILE*  my_pFileTime = fopen (pYUVFileNameTime, "at");
+//
+//    string text = "";
+//    std::ostringstream ossText;
+//    ossText << ssim << "\t" << psnr << "\n";
+//    text = ossText.str();
+//    fprintf(my_pFileTime, "%s", text.c_str());
+//    fclose(my_pFileTime);
+
+return 0;
+
+} // end main
+#endif
+
+
+//// Convert double pointer to vector
+//vector<vector<unsigned char>> Arr2Vec(unsigned char** x, int jpegImageWidth , int jpegImageHeight)
+//{
+//    vector<vector<unsigned char>> temp;
+//    temp.resize(jpegImageHeight, vector<unsigned char> (jpegImageWidth, 0));
+//
+//    for(int i = 0; i < jpegImageHeight; ++i) {
+//        for(int j = 0; j < jpegImageWidth; ++j) {
+//            temp[i][j] = x[i][j];
+//        }
+//    }
+//
+//    return temp;
+//}
+
+//double getPSNR(const cv::Mat& i1, const cv::Mat& i2, uint16_t jpegImageWidth, uint16_t jpegImageHeight)
+//{
+//    Mat s1;
+//    absdiff(i1, i2, s1);       // |I1 - I2|
+//    s1.convertTo(s1, CV_32F);  // cannot make a square on 8 bits
+//    s1 = s1.mul(s1);           // |I1 - I2|^2
+//
+//    Scalar s = sum(s1);         // sum elements per channel
+//    cout<<"sum:"<<s[0]<<endl;
+//    double mse = s[0]; // sum channels
+//
+//    if( mse <= 1e-10) // for small values return zero
+//        return 999.99;
+//    else
+//    {
+//        double psnr = 10.0*log10((255*255*jpegImageWidth*jpegImageHeight)/mse);
+//        return psnr;
+//    }
+//}
+
+//cv::Mat vec2mat(vector< vector<unsigned char> > &matrix){
+//
+//    cv::Mat matrix_CV(0, matrix.size(), cv::DataType<unsigned char>::type);
+//
+//    for (unsigned int i = 0; i < matrix.size(); ++i)
+//    {
+//        // Make a temporary cv::Mat row and add to NewSamples _without_ data copy
+//        cv::Mat Sample(1, matrix[0].size(), cv::DataType<unsigned char>::type, matrix[i].data());
+//        matrix_CV.push_back(Sample);
+//    }
+//    return matrix_CV;
+//}
+#if S7S_debug<1
+int main (int argc, char** argv)
+{
+
+double cosine_idct[8][8];
+const float PI = 3.14159265358979323846264338327950288419716939937510582097494459230781640628f;
+const double inv16 = 1.0 / 16.0;
+for (int i = 0; i < 8; i++)
+{
+for (int j = 0; j < 8; j++)
+{
+cosine_idct[j][i] = cosf( (2.0 * i + 1) * j * PI * inv16 );
+}
+}
+
+//    // Input file:
+//    //    std::string f1_yuv = argv[1];
+//    std::string f1_yuv = "/Users/ahamsala/Documents/validation_original/shard-0/1/ILSVRC2012_val_00000001.JPEG";
+//
+//    // Input file:
+//    //    std::string f2_yuv = argv[2];
+//    std::string f2_yuv = "/Users/ahamsala/Documents/validation_generated_QF";
+////    cout<<"here"<<endl;
+//    // Output file
+//    //    std::string output_file = ;
+//    runEncoderWithMultipleQF(f1_yuv,f2_yuv,"/Users/ahamsala/Documents/validation_generated_QF_TXT",cosine_idct);
+
+// insert code here...
+
+
+if(argc < 4)
+{
+// Tell the user how to run the program
+std::cerr << "Number of arguments should be 3: <input_file_with_full_path> <output_folder> <txt_folder> <Quality_factor>" << std::endl;
+/* "Usage messages" are a conventional way of telling the user
+* how to run a program if they enter the command incorrectly.
+*/
+return 1;
+}
+
+/// JPEG Stuff
+//    std::string path_to_files = "/Users/hossam.amer/7aS7aS_Works/work/my_Tools/jpeg_tcm/dataset/";
+
+// Input file:
+std::string filename = argv[1];
+
+// Ouptut folder path:
+std::string enc_path_to_files = argv[2];
+
+// out txt path:
+
+std::string enc_path_txt = argv[3];
+
+// Input quality factor:
+std::string arg = argv[4];
+int quality_factor;
+try {
+std::size_t pos;
+quality_factor = std::stoi(arg, &pos);
+if (pos < arg.size()) {
+std::cerr << "Trailing characters after number: " << arg << '\n';
+}
+} catch (std::invalid_argument const &ex) {
+std::cerr << "Invalid number: " << arg << '\n';
+return 1;
+} catch (std::out_of_range const &ex) {
+std::cerr << "Number out of range: " << arg << '\n';
+return 1;
+}
+
+// Quality factor experiment:
+////////////////////////////////////////////////////////
+
+try {
+// Hossam: Save the input fileName
+std::string encoded_filename = filename;
+
+size_t found = encoded_filename.find_last_of("/\\");
+std::string filename_first_token = encoded_filename.substr(found+1);
+found = filename_first_token.find_first_of(".");
+std::string filename_second_token = filename_first_token.substr(0, found);
+
+
+// Update the full path for the encoded_file name
+encoded_filename = enc_path_to_files + filename_second_token + "-QF-" + to_string(quality_factor) + filename_first_token.substr(found);
+
+
+//        runEncoderWithMultipleQF(filename, enc_path_to_files, cosine_idct);
+runEncoderWithMultipleQF(filename,enc_path_to_files,enc_path_txt,cosine_idct);
+
+} catch (Exception e) {
+cerr << "Input the folder properly" << endl;
+return 1;
+
+}
+
+}
+#endif
+
+#if S7S_debug>1
+int main(int argc, char** argv) {
+double mssim_Y,mssim_Cb,mssim_Cr,mssim;
+double psnr_Y,psnr_Cb,psnr_Cr,psnr;
+mssim_Cb = 0;
+psnr_Cb = 0;
+mssim_Cr = 0;
+psnr_Cr = 0;
+double cosine_idct[8][8];
+const float PI = 3.14159265358979323846264338327950288419716939937510582097494459230781640628f;
+const double inv16 = 1.0 / 16.0;
+for (int i = 0; i < 8; i++)
+{
+for (int j = 0; j < 8; j++)
+{
+cosine_idct[j][i] = cosf( (2.0 * i + 1) * j * PI * inv16 );
+}
+}
+//    if(argc < 4)
+//    {
+//        // Tell the user how to run the program
+//        std::cerr << "Number of arguments should be 4: <jpegfile1> <jpegfile2> <out_file>" << std::endl;
+//        /* "Usage messages" are a conventional way of telling the user
+//         * how to run a program if they enter the command incorrectly.
+//         */
+//        return 1;
+//    }
+
+// Input file:
+//    std::string f1_yuv = argv[1];
+std::string f1_yuv = "/Users/ahamsala/Documents/validation_original/shard-0/1/ILSVRC2012_val_00000001.JPEG";
+
+// Input file:
+//    std::string f2_yuv = argv[2];
+std::string f2_yuv = "/Volumes/MULTICOM-104/validation_generated_QF/shard-0/1/ILSVRC2012_val_00000001-QF-50.JPEG";
+// Output file
+//    std::string output_file = ;
+//    runEncoderWithMultipleQF("/Volumes/MULTICOM-104/validation_original/shard-0/1/ILSVRC2012_val_00000001.JPEG","/Volumes/MULTICOM-104/validation_generated_QF","/Volumes/MULTICOM-104/validation_generated_QF_TXT_1",cosine_idct);
+//    exit(0);
+// first and Second Image
+jpeg_decoder* Org_YUV;
+jpeg_decoder* QF_YUV;
+Org_YUV = new jpeg_decoder(f1_yuv,cosine_idct);
+QF_YUV = new jpeg_decoder(f2_yuv,cosine_idct);
+// Y Compenent
+// Convert Picture buffer into vector
+vector<vector<unsigned char>> ORG_vec_Y, ORG_vec_Cb, ORG_vec_Cr;
+cv::Mat ORG_mat_Cr_420, ORG_mat_Cb_420;
+ORG_vec_Y.resize(Org_YUV->jpegImageHeight, vector<unsigned char> (Org_YUV->jpegImageWidth, 0));
+ORG_vec_Y = Arr2Vec(Org_YUV->m_YPicture_buffer,Org_YUV->jpegImageWidth, Org_YUV->jpegImageHeight);
+cv::Mat ORG_mat_Y = vec2mat(ORG_vec_Y);
+
+// Convert Picture buffer into vector
+vector<vector<unsigned char>> QF_vec_Y, QF_vec_Cb, QF_vec_Cr;
+cv::Mat QF_mat_Cr_420, QF_mat_Cb_420;
+QF_vec_Y.resize(QF_YUV->jpegImageHeight, vector<unsigned char> (QF_YUV->jpegImageWidth, 0));
+QF_vec_Y = Arr2Vec(QF_YUV->m_YPicture_buffer,QF_YUV->jpegImageWidth, QF_YUV->jpegImageHeight);
+cv::Mat QF_mat_Y = vec2mat(QF_vec_Y);
+// Calculate the quality metrics
+psnr_Y = getPSNR(ORG_mat_Y, QF_mat_Y, QF_YUV->jpegImageWidth, QF_YUV->jpegImageHeight);
+Scalar final_mssim = getMSSIM(ORG_mat_Y, QF_mat_Y);
+mssim_Y = final_mssim[0];
+if (Org_YUV->components.size() > 1)
+{
+// Cb component
+ORG_vec_Cb.resize(Org_YUV->jpegImageHeight, vector<unsigned char> (Org_YUV->jpegImageWidth, 0));
+ORG_vec_Cb = Arr2Vec(Org_YUV->m_CbPicture_buffer,Org_YUV->jpegImageWidth, Org_YUV->jpegImageHeight);
+cv::Mat ORG_mat_Cb = vec2mat(ORG_vec_Cb);
+resize(ORG_mat_Cb, ORG_mat_Cb_420, Size(Org_YUV->jpegImageWidth/2,Org_YUV->jpegImageHeight/2));
+
+// Cr component
+ORG_vec_Cr.resize(Org_YUV->jpegImageHeight, vector<unsigned char> (Org_YUV->jpegImageWidth, 0));
+ORG_vec_Cr = Arr2Vec(Org_YUV->m_CrPicture_buffer,Org_YUV->jpegImageWidth, Org_YUV->jpegImageHeight);
+cv::Mat ORG_mat_Cr= vec2mat(ORG_vec_Cr);
+resize(ORG_mat_Cr, ORG_mat_Cr_420, Size(Org_YUV->jpegImageWidth/2,Org_YUV->jpegImageHeight/2));
+}
+if (Org_YUV->components.size() > 1)
+{
+// Cb component
+QF_vec_Cb.resize(QF_YUV->jpegImageHeight, vector<unsigned char> (QF_YUV->jpegImageWidth, 0));
+QF_vec_Cb = Arr2Vec(QF_YUV->m_CbPicture_buffer,QF_YUV->jpegImageWidth, QF_YUV->jpegImageHeight);
+cv::Mat QF_mat_Cb= vec2mat(QF_vec_Cb);
+resize(QF_mat_Cb, QF_mat_Cb_420, Size(QF_YUV->jpegImageWidth/2,QF_YUV->jpegImageHeight/2));
+
+// Cr component
+QF_vec_Cr.resize(QF_YUV->jpegImageHeight, vector<unsigned char> (QF_YUV->jpegImageWidth, 0));
+QF_vec_Cr = Arr2Vec(QF_YUV->m_CrPicture_buffer,QF_YUV->jpegImageWidth, QF_YUV->jpegImageHeight);
+cv::Mat QF_mat_Cr= vec2mat(QF_vec_Cr);
+resize(QF_mat_Cr, QF_mat_Cr_420, Size(QF_YUV->jpegImageWidth/2,QF_YUV->jpegImageHeight/2));
+
+// Calculate the quality metrics
+psnr_Cb = getPSNR(ORG_mat_Cb_420, QF_mat_Cb_420, QF_YUV->jpegImageWidth/2, QF_YUV->jpegImageHeight/2);
+psnr_Cr = getPSNR(ORG_mat_Cr_420, QF_mat_Cr_420, QF_YUV->jpegImageWidth/2, QF_YUV->jpegImageHeight/2);
+Scalar final_mssim = getMSSIM(ORG_mat_Cb_420, QF_mat_Cb_420);
+mssim_Cb = final_mssim[0];
+final_mssim = getMSSIM(ORG_mat_Cr_420, QF_mat_Cr_420);
+mssim_Cr = final_mssim[0];
+}
+cout << "\n\nDecode " << f2_yuv << " is done!" << endl;
+delete Org_YUV;
+delete QF_YUV;
+mssim = (6*mssim_Y + mssim_Cb + mssim_Cr)/8;
+psnr =(6*psnr_Y + psnr_Cb + psnr_Cr)/8;
+
+#if S7S_debug >3
+imshow("QF_mat_Y",QF_mat_Y);
+cv::waitKey(0);
+imshow("ORG_mat_Y",ORG_mat_Y);
+cv::waitKey(0);
+printf("# Decoded 8x8 Block#\n");
+cout << std::dec <<  ORG_mat_Y.rowRange(0,1) << " *** "<< QF_mat_Y.rowRange(0,1)<<endl;
+for(int i = 0; i < 8; ++i){
+for(int j = 0; j < 8; ++j){
+cout << int(ORG_mat_Y.at<unsigned char>(i,j)) << " ";
+}
+cout << "\n";
+}
+cout << "\n" <<endl;
+for(int i = 0; i < 8; ++i){
+for(int j = 0; j < 8; ++j){
+cout << int(QF_mat_Y.at<unsigned char>(i,j)) << " ";
+}
+cout << "\n";
+}
+#endif
+cout<<"PSNR_Y : "<<psnr_Y<<endl;
+cout<<"PSNR_Cb: "<<psnr_Cb<<endl;
+cout<<"PSNR_Cr: "<<psnr_Cr<<endl;
+
+cout<<"mssim_Y : "<<mssim_Y<<endl;
+cout<<"mssim_Cb: "<<mssim_Cb<<endl;
+cout<<"mssim_Cr: "<<mssim_Cr<<endl;
+
+cout<<"mssim: "<<mssim<<endl;
+cout<<"psnr: "<<psnr<<endl;
+
+return 0;
+
+} // end main
+#endif
+

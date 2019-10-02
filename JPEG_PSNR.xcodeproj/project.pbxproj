@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		05B6CADA23352E3A00AD6321 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05B6CAD923352E3A00AD6321 /* main.cpp */; };
+		05B6CAEE23358E7A00AD6321 /* huffmantable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05B6CAE223358E7900AD6321 /* huffmantable.cpp */; };
+		05B6CAEF23358E7A00AD6321 /* quantizationtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05B6CAE523358E7900AD6321 /* quantizationtable.cpp */; };
+		05B6CAF023358E7A00AD6321 /* component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05B6CAE723358E7A00AD6321 /* component.cpp */; };
+		05B6CAF123358E7A00AD6321 /* huffmanelementscount.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05B6CAEB23358E7A00AD6321 /* huffmanelementscount.cpp */; };
+		05B6CAF223358E7A00AD6321 /* jpegdecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05B6CAEC23358E7A00AD6321 /* jpegdecoder.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +28,24 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		051C9C322335F90400A97161 /* jpegencoderMultipleQF.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jpegencoderMultipleQF.h; path = "../../../../University of Waterloo/jpeg_tcm/jpeg_tcm/jpeg_tcm/jpegencoderMultipleQF.h"; sourceTree = "<group>"; };
+		05449C87233934CB00C83198 /* mainBackup.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = mainBackup.txt; sourceTree = "<group>"; };
 		05B6CAD623352E3A00AD6321 /* JPEG_PSNR */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JPEG_PSNR; sourceTree = BUILT_PRODUCTS_DIR; };
 		05B6CAD923352E3A00AD6321 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		05B6CAE023358E7900AD6321 /* operation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = operation.h; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/operation.h"; sourceTree = "<group>"; };
+		05B6CAE123358E7900AD6321 /* TypeDef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TypeDef.h; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/TypeDef.h"; sourceTree = "<group>"; };
+		05B6CAE223358E7900AD6321 /* huffmantable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = huffmantable.cpp; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/huffmantable.cpp"; sourceTree = "<group>"; };
+		05B6CAE323358E7900AD6321 /* huffmantable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = huffmantable.h; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/huffmantable.h"; sourceTree = "<group>"; };
+		05B6CAE423358E7900AD6321 /* inttypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = inttypes.h; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/inttypes.h"; sourceTree = "<group>"; };
+		05B6CAE523358E7900AD6321 /* quantizationtable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = quantizationtable.cpp; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/quantizationtable.cpp"; sourceTree = "<group>"; };
+		05B6CAE623358E7900AD6321 /* dctblock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dctblock.h; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/dctblock.h"; sourceTree = "<group>"; };
+		05B6CAE723358E7A00AD6321 /* component.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = component.cpp; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/component.cpp"; sourceTree = "<group>"; };
+		05B6CAE823358E7A00AD6321 /* huffmanelementscount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = huffmanelementscount.h; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/huffmanelementscount.h"; sourceTree = "<group>"; };
+		05B6CAE923358E7A00AD6321 /* jpegdecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = jpegdecoder.h; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/jpegdecoder.h"; sourceTree = "<group>"; };
+		05B6CAEA23358E7A00AD6321 /* quantizationtable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = quantizationtable.h; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/quantizationtable.h"; sourceTree = "<group>"; };
+		05B6CAEB23358E7A00AD6321 /* huffmanelementscount.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = huffmanelementscount.cpp; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/huffmanelementscount.cpp"; sourceTree = "<group>"; };
+		05B6CAEC23358E7A00AD6321 /* jpegdecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = jpegdecoder.cpp; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/jpegdecoder.cpp"; sourceTree = "<group>"; };
+		05B6CAED23358E7A00AD6321 /* component.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = component.h; path = "../../../../OneDrive/jpeg_tcm-master/jpeg_tcm/jpeg_tcm/component.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +79,22 @@
 			isa = PBXGroup;
 			children = (
 				05B6CAD923352E3A00AD6321 /* main.cpp */,
+				05449C87233934CB00C83198 /* mainBackup.txt */,
+				05B6CAE723358E7A00AD6321 /* component.cpp */,
+				05B6CAED23358E7A00AD6321 /* component.h */,
+				05B6CAE623358E7900AD6321 /* dctblock.h */,
+				05B6CAEB23358E7A00AD6321 /* huffmanelementscount.cpp */,
+				05B6CAE823358E7A00AD6321 /* huffmanelementscount.h */,
+				05B6CAE223358E7900AD6321 /* huffmantable.cpp */,
+				05B6CAE323358E7900AD6321 /* huffmantable.h */,
+				05B6CAE423358E7900AD6321 /* inttypes.h */,
+				05B6CAEC23358E7A00AD6321 /* jpegdecoder.cpp */,
+				05B6CAE923358E7A00AD6321 /* jpegdecoder.h */,
+				05B6CAE023358E7900AD6321 /* operation.h */,
+				05B6CAE523358E7900AD6321 /* quantizationtable.cpp */,
+				05B6CAEA23358E7A00AD6321 /* quantizationtable.h */,
+				05B6CAE123358E7900AD6321 /* TypeDef.h */,
+				051C9C322335F90400A97161 /* jpegencoderMultipleQF.h */,
 			);
 			path = JPEG_PSNR;
 			sourceTree = "<group>";
@@ -118,6 +155,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				05B6CAEE23358E7A00AD6321 /* huffmantable.cpp in Sources */,
+				05B6CAF023358E7A00AD6321 /* component.cpp in Sources */,
+				05B6CAF223358E7A00AD6321 /* jpegdecoder.cpp in Sources */,
+				05B6CAF123358E7A00AD6321 /* huffmanelementscount.cpp in Sources */,
+				05B6CAEF23358E7A00AD6321 /* quantizationtable.cpp in Sources */,
 				05B6CADA23352E3A00AD6321 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -238,6 +280,58 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/Cellar/opencv/4.1.0_2/include/**",
+					/usr/local/include/opencv2,
+					/usr/local/inlcude/opencv4,
+					/usr/local/include/opencv,
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/opencv/4.1.0_2/lib;
+				OTHER_LDFLAGS = (
+					"-lopencv_stitching",
+					"-lopencv_superres",
+					"-lopencv_videostab",
+					"-lopencv_aruco",
+					"-lopencv_bgsegm",
+					"-lopencv_bioinspired",
+					"-lopencv_ccalib",
+					"-lopencv_dnn_objdetect",
+					"-lopencv_dpm",
+					"-lopencv_face",
+					"-lopencv_photo",
+					"-lopencv_fuzzy",
+					"-lopencv_hfs",
+					"-lopencv_img_hash",
+					"-lopencv_line_descriptor",
+					"-lopencv_optflow",
+					"-lopencv_reg",
+					"-lopencv_rgbd",
+					"-lopencv_saliency",
+					"-lopencv_stereo",
+					"-lopencv_structured_light",
+					"-lopencv_phase_unwrapping",
+					"-lopencv_surface_matching",
+					"-lopencv_tracking",
+					"-lopencv_datasets",
+					"-lopencv_dnn",
+					"-lopencv_plot",
+					"-lopencv_xfeatures2d",
+					"-lopencv_shape",
+					"-lopencv_video",
+					"-lopencv_ml",
+					"-lopencv_ximgproc",
+					"-lopencv_calib3d",
+					"-lopencv_features2d",
+					"-lopencv_highgui",
+					"-lopencv_videoio",
+					"-lopencv_flann",
+					"-lopencv_xobjdetect",
+					"-lopencv_imgcodecs",
+					"-lopencv_objdetect",
+					"-lopencv_xphoto",
+					"-lopencv_imgproc",
+					"-lopencv_core",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -246,6 +340,58 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/Cellar/opencv/4.1.0_2/include/**",
+					/usr/local/include/opencv2,
+					/usr/local/inlcude/opencv4,
+					/usr/local/include/opencv,
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/opencv/4.1.0_2/lib;
+				OTHER_LDFLAGS = (
+					"-lopencv_stitching",
+					"-lopencv_superres",
+					"-lopencv_videostab",
+					"-lopencv_aruco",
+					"-lopencv_bgsegm",
+					"-lopencv_bioinspired",
+					"-lopencv_ccalib",
+					"-lopencv_dnn_objdetect",
+					"-lopencv_dpm",
+					"-lopencv_face",
+					"-lopencv_photo",
+					"-lopencv_fuzzy",
+					"-lopencv_hfs",
+					"-lopencv_img_hash",
+					"-lopencv_line_descriptor",
+					"-lopencv_optflow",
+					"-lopencv_reg",
+					"-lopencv_rgbd",
+					"-lopencv_saliency",
+					"-lopencv_stereo",
+					"-lopencv_structured_light",
+					"-lopencv_phase_unwrapping",
+					"-lopencv_surface_matching",
+					"-lopencv_tracking",
+					"-lopencv_datasets",
+					"-lopencv_dnn",
+					"-lopencv_plot",
+					"-lopencv_xfeatures2d",
+					"-lopencv_shape",
+					"-lopencv_video",
+					"-lopencv_ml",
+					"-lopencv_ximgproc",
+					"-lopencv_calib3d",
+					"-lopencv_features2d",
+					"-lopencv_highgui",
+					"-lopencv_videoio",
+					"-lopencv_flann",
+					"-lopencv_xobjdetect",
+					"-lopencv_imgcodecs",
+					"-lopencv_objdetect",
+					"-lopencv_xphoto",
+					"-lopencv_imgproc",
+					"-lopencv_core",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
