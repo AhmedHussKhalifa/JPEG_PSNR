@@ -19,7 +19,6 @@
 #include "huffmantable.h"
 
 // Include the tcm.h for the encoder TCM computations
-#include "tcm.h"
 
 // for debugging LookNBits
 #include <iostream>

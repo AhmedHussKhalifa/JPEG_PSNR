@@ -21,13 +21,13 @@
 
 #include "jpegdecoder.h"
 #include "TypeDef.h"
-#include "jpegencoderMultipleQF.h"
+#include "jpegencoderMultipleQF2.h"
 
 // for time
 #include <chrono>
 
 
-#define IS_PARALLEL 0
+#define IS_PARALLEL 1
 
 using namespace std;
 using namespace cv;
@@ -60,21 +60,21 @@ double getPSNR3(const Mat& I1, const Mat& I2)
 int main(int argc, char** argv) {
     
     
-//    if(argc < 4)
-//    {
-//        // Tell the user how to run the program
-//        std::cerr << "Number of arguments should be 4: <jpegfile1> <jpegfile2> <out_file>" << std::endl;
-//        /* "Usage messages" are a conventional way of telling the user
-//         * how to run a program if they enter the command incorrectly.
-//         */
-//        return 1;
-//    }
+    if(argc < 4)
+    {
+        // Tell the user how to run the program
+        std::cerr << "Number of arguments should be 4: <jpegfile1> <jpegfile2> <out_file>" << std::endl;
+        /* "Usage messages" are a conventional way of telling the user
+         * how to run a program if they enter the command incorrectly.
+         */
+        return 1;
+    }
     
-//    std::string filename = argv[1];
-//    // Ouptut folder path:
-//    std::string enc_path_to_files = argv[2];
-//    // out txt path:
-//    std::string enc_path_txt = argv[3];
+    std::string filename = argv[1];
+    // Ouptut folder path:
+    std::string enc_path_to_files = argv[2];
+    // out txt path:
+    std::string enc_path_txt = argv[3];
     
     
 //    std::string filename = "/Volumes/MULTICOM-104/validation_original/shard-0/1/ILSVRC2012_val_00000001.JPEG";
@@ -97,12 +97,66 @@ int main(int argc, char** argv) {
 //        std::string enc_path_txt = "/Volumes/MULTICOM-104/validation_generated_QF_TXT_1";
 //        runEncoderWithMultipleQF(filename, enc_path_to_files, enc_path_txt);
         
-        string filename = "/Volumes/MULTICOM-104/validation_original/shard-2/28/ILSVRC2012_val_00027301.JPEG";
-        string enc_path_to_files = "/Volumes/MULTICOM-104/validation_generated_QF";
-        string enc_path_txt = "/Volumes/MULTICOM-104/validation_generated_QF_TXT_1";
-        runEncoderWithMultipleQF(filename, enc_path_to_files, enc_path_txt);
+// 0-1 ILSVRC2012_val_00000034
+// 0-2 ILSVRC2012_val_00001837
+// 0-1 ILSVRC2012_val_00000001
+//        string filename = "/Volumes/MULTICOM-104/validation_original/shard-2/28/ILSVRC2012_val_00027301.JPEG";
+//        string filename = "/Volumes/MULTICOM-104/validation_original/shard-0/1/ILSVRC2012_val_00000001.JPEG";
+//        string filename = "/Volumes/MULTICOM-104/validation_original/shard-0/2/ILSVRC2012_val_00001837.JPEG";
         
+//        string filename = "/Volumes/MULTICOM-104/validation_original/shard-0/1/ILSVRC2012_val_00000034.JPEG";
+//        string filename2 ="/Volumes/MULTICOM-104/validation_generated_QF/shard-0/1/ILSVRC2012_val_00000034-QF-0.JPEG";
+        
+//        string enc_path_to_files = "/Volumes/MULTICOM-104/validation_generated_QF";
+//        string enc_path_txt = "/Volumes/MULTICOM-104/validation_generated_QF_TXT_1";
 //        runEncoderWithMultipleQF(filename, enc_path_to_files, enc_path_txt);
+        runEncoderWithMultipleQF(filename,enc_path_to_files, enc_path_txt);
+////        runEncoderWithMultipleQF(filename, enc_path_to_files, enc_path_txt);
+//
+//        // Sequential
+////        string filename2 = "/Volumes/MULTICOM-104/validation_generated_QF/shard-0/2/ILSVRC2012_val_00001837-QF-0.JPEG";
+//        string filename2 = "/Volumes/MULTICOM-104/validation_generated_QF/shard-0/1/ILSVRC2012_val_00000001-QF-0.JPEG";
+//
+//        // Y test:
+//
+//        cout << "SEQUENTIAL TEST ----- " << endl;
+//
+////        Mat image_org = imread(filename, IMREAD_COLOR);
+//        Mat image_org = imread(filename, IMREAD_UNCHANGED);
+//        Mat image_qf = imread(filename2, IMREAD_UNCHANGED);
+//        int n_comp = image_org.channels();
+//        cout << "nChannels: " << n_comp << endl;
+//        Mat ycbcr_org;
+//        if (n_comp>1)
+//        {
+//            cv::cvtColor(image_org, ycbcr_org, cv::COLOR_BGR2YCrCb);
+//        }
+//        else
+//        {
+//            cout<< getPSNR(image_org, image_qf, image_org.cols, image_org.rows) <<endl;
+////            imshow("Image 1", image_org);
+////            waitKey(0);
+//        }
+//        cout << "nChannels**: " << ycbcr_org.channels() << endl;
+//        cv::Mat ycbcr_channels[3];
+//        cv::split(ycbcr_org, ycbcr_channels);
+//
+////        Mat image_qf = imread(filename2, IMREAD_COLOR);
+//
+//        Mat ycbcr_qf;
+//        cv::cvtColor(image_qf, ycbcr_qf, cv::COLOR_BGR2YCrCb);
+//        cv::Mat ycbcr_channels_qf[3];
+//        cv::split(ycbcr_qf, ycbcr_channels_qf);
+//
+//
+//        double val = getPSNR(ycbcr_channels[0], ycbcr_channels_qf[0], ycbcr_org.cols, ycbcr_org.rows);
+//        cout << "FINAL PSNR: " << val << endl;
+//        val = getPSNR(ycbcr_channels[1], ycbcr_channels_qf[1], ycbcr_org.cols, ycbcr_org.rows);
+//        cout << "FINAL PSNR: " << val << endl;
+//        val = getPSNR(ycbcr_channels[2], ycbcr_channels_qf[2], ycbcr_org.cols, ycbcr_org.rows);
+//        cout << "FINAL PSNR: " << val << endl;
+        
+        
         
     } catch (Exception e) {
         cerr << "Input the folder properly" << endl;

@@ -3,10 +3,10 @@
 
 # Number of Parallel tasks (make sure that they are multiples of 11 since we are running 11 QF per image)
 num_parallel_tasks=100
-ID=28
-last_ID=30
+ID=11
+last_ID=50
 last_folder=4
-folder=2
+folder=1
 
 
 SECONDS=0
@@ -26,6 +26,7 @@ while [ $folder -le $last_folder ]; do {
     # input_path_to_files=/Volumes/DATA/ml/ImageNet_2nd
     # input_path_to_files=/Users/hossam.amer/7aS7aS_Works/work/my_Tools/jpeg_tcm/dataset/tcm_analysis
     # input_path_to_files=/Users/hossam.amer/7aS7aS_Works/work/my_Tools/jpeg_tcm/dataset/set/set1
+    folder=$(( (($ID-1)) /10 ))
     input_path_to_files=/Volumes/MULTICOM-104/validation_original/shard-$folder/$ID
     # input_path_to_files=/Users/ahamsala/Documents/validation_original/shard-$folder/$ID
     # input_path_to_files=/Volumes/MULTICOM-104/validation_original/shard-0/1_1
@@ -42,7 +43,7 @@ while [ $folder -le $last_folder ]; do {
     output_path_to_files=/Volumes/MULTICOM-104/validation_generated_QF
     # output_path_to_files=/Users/ahamsala/Documents/validation_generated_QF
     # mkdir $output_path_to_files
-    output_txt=/Volumes/MULTICOM-104/validation_generated_QF_TXT_1
+    output_txt=/Volumes/MULTICOM-104/validation_generated_QF_TXT_6
     # mkdir $output_path_to_files
 
 
@@ -58,7 +59,7 @@ while [ $folder -le $last_folder ]; do {
     # Print the jpeg files and their total number
     # echo "${jpeg_files[@]}"
     # echo $jpeg_files_count
-
+    
 
 
     # Generate quality factors
@@ -252,6 +253,6 @@ while [ $folder -le $last_folder ]; do {
   echo 'outer Folder:' $folder
   echo 'outer subFOlder: ' $ID
 # done
-  let "folder=folder+1"
+  # let "folder=folder+1"
 } done # folder loop
 #******#******#******#******#******#******#******#******#******#******
